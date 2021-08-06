@@ -44,18 +44,23 @@ class _CheckInViewState extends State<CheckInView> {
   ) {
     setState(() => _isLoading = true);
     final Distance distance = new Distance();
-    bool flag = false;
+    OfficeLocation? locationData;
 
     for (int i = 0; i < locations.length; i++) {
       double meter = distance(LatLng(userLatitude, userLongitude),
           LatLng(locations[i].latitude, locations[i].longitude));
-      if (meter < 5) {
-        flag = true;
+      if (meter < 50) {
+        locationData = locations[i];
         break;
       }
     }
 
-    if (flag) {
+    if (locationData != null) {
+      instance.collection('attendances').add({
+        'title': locationData.title,
+        'description': locationData.description,
+        'timestamp': Timestamp.now(),
+      });
       final snackBar = SnackBar(
         content: Text(
           'Check In Success',
