@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_attendance_hm/cubit/firestore/firestore_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../shared/bottom_navigation_bar.dart';
 import '../shared/curve_background.dart';
@@ -12,6 +16,14 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final attendancesStream =
+        BlocProvider.of<FirestoreCubit>(context, listen: false)
+            .state
+            .instance
+            .collection('attendances')
+            .orderBy("timestamp", descending: true)
+            .snapshots();
+
     return Scaffold(
       body: Stack(
         children: [
@@ -145,128 +157,168 @@ class HomeScreen extends StatelessWidget {
                       color: Colors.white,
                     ),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Attendance History",
                           style: Theme.of(context).textTheme.headline6,
                         ),
-                        SizedBox(height: 5),
-                        Divider(),
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                        StreamBuilder<QuerySnapshot>(
+                          stream: attendancesStream,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Something went wrong');
+                            }
+
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Text("Loading");
+                            }
+                            return ListView(
+                              primary: false,
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              children: snapshot.data!.docs
+                                  .take(3)
+                                  .map((DocumentSnapshot document) {
+                                Map<String, dynamic> data =
+                                    document.data()! as Map<String, dynamic>;
+                                DateTime date = data['timestamp'].toDate();
+                                String formattedDate =
+                                    DateFormat.yMMMd().add_jm().format(date);
+                                return Column(
                                   children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.event_available),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          "5 August 2021, 08.30 AM",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2,
-                                        ),
-                                      ],
+                                    Divider(),
+                                    Container(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 8),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.event_available),
+                                                    SizedBox(width: 3),
+                                                    Text(
+                                                      formattedDate,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText2,
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 5),
+                                                Text(data['title'],
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyText1),
+                                                SizedBox(height: 5),
+                                                if (data['description'] != null)
+                                                  Text(data['description'],
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText2),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(width: 15),
+                                          Icon(
+                                            Icons.chevron_right,
+                                            size: 28,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                        "Neo Soho Podomoro City Unit 37.10 Jalan Letjen S. Parman Kav. 28",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2),
                                   ],
-                                ),
-                              ),
-                              SizedBox(width: 15),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 28,
-                              ),
-                            ],
-                          ),
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
-                        Divider(),
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.event_available),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          "4 August 2021, 07.15 AM",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2,
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                        "Neo Soho Podomoro City Unit 37.10 Jalan Letjen S. Parman Kav. 28"),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 15),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 28,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Divider(),
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.event_available),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          "3 August 2021, 08.22 AM",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText2,
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                        "Neo Soho Podomoro City Unit 37.10 Jalan Letjen S. Parman Kav. 28"),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 15),
-                              Icon(
-                                Icons.chevron_right,
-                                size: 28,
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Divider(),
+                        // Container(
+                        //   padding: EdgeInsets.symmetric(vertical: 8),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //     children: [
+                        //       Expanded(
+                        //         child: Column(
+                        //           crossAxisAlignment: CrossAxisAlignment.start,
+                        //           children: [
+                        //             Row(
+                        //               children: [
+                        //                 Icon(Icons.event_available),
+                        //                 SizedBox(width: 3),
+                        //                 Text(
+                        //                   "4 August 2021, 07.15 AM",
+                        //                   style: Theme.of(context)
+                        //                       .textTheme
+                        //                       .bodyText2,
+                        //                 ),
+                        //               ],
+                        //             ),
+                        //             SizedBox(
+                        //               height: 5,
+                        //             ),
+                        //             Text(
+                        //                 "Neo Soho Podomoro City Unit 37.10 Jalan Letjen S. Parman Kav. 28"),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //       SizedBox(width: 15),
+                        //       Icon(
+                        //         Icons.chevron_right,
+                        //         size: 28,
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Divider(),
+                        // Container(
+                        //   padding: EdgeInsets.symmetric(vertical: 8),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //     children: [
+                        //       Expanded(
+                        //         child: Column(
+                        //           crossAxisAlignment: CrossAxisAlignment.start,
+                        //           children: [
+                        //             Row(
+                        //               children: [
+                        //                 Icon(Icons.event_available),
+                        //                 SizedBox(width: 3),
+                        //                 Text(
+                        //                   "3 August 2021, 08.22 AM",
+                        //                   style: Theme.of(context)
+                        //                       .textTheme
+                        //                       .bodyText2,
+                        //                 ),
+                        //               ],
+                        //             ),
+                        //             SizedBox(
+                        //               height: 5,
+                        //             ),
+                        //             Text(
+                        //                 "Neo Soho Podomoro City Unit 37.10 Jalan Letjen S. Parman Kav. 28"),
+                        //           ],
+                        //         ),
+                        //       ),
+                        //       SizedBox(width: 15),
+                        //       Icon(
+                        //         Icons.chevron_right,
+                        //         size: 28,
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
