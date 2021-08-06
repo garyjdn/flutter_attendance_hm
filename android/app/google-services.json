@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "623374053304",
+    "project_id": "flutter-attendance-hm",
+    "storage_bucket": "flutter-attendance-hm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:623374053304:android:4e08fcca31a0b97b18694d",
+        "android_client_info": {
+          "package_name": "com.garyjdn.attendance_hm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "623374053304-lilc3pqq1ic9l5ftt3cdcnv8scf2r27i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgW4hjGuX1g1e_kxRe-QlQaXa9Avddm9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "623374053304-lilc3pqq1ic9l5ftt3cdcnv8scf2r27i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
